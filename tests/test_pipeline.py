@@ -147,16 +147,18 @@ def test_low_signal_checkpoint_requires_direction(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
     ubersuggest_path = tmp_path / "ubersuggest.json"
+    answer_path = tmp_path / "answer.csv"
     ubersuggest_path.write_text(
         json.dumps({"rows": [{"keyword": "seo agency", "volume": 1000}]}),
         encoding="utf-8",
     )
+    answer_path.write_text("question,intent\nwhat is local seo,informational\n", encoding="utf-8")
     manifest_path = tmp_path / "capture-status.json"
     manifest_path.write_text(
         json.dumps(
             {
                 "ubersuggest": {"status": "ok", "artifact": str(ubersuggest_path)},
-                "answer_the_public": {"status": "ok", "artifact": None},
+                "answer_the_public": {"status": "ok", "artifact": str(answer_path)},
             }
         ),
         encoding="utf-8",

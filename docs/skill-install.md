@@ -11,9 +11,9 @@ Use this document only when the repository is installed as a skill bundle for an
 
 ## Path Policy
 
-- Resolve references relative to the installed skill root.
+- Resolve references relative to `$SKILL_ROOT`.
 - Use repo-relative paths such as `Tools/OpportunityPipeline.py` and `Workflows/RunWithCliAgents.md`.
-- Do not publish hardcoded paths like `~/.claude/skills/SearchIntentAutomation/...` in public docs, prompts, or issue templates.
+- Do not publish runtime-specific absolute paths in public docs, prompts, or issue templates.
 
 ## Command Form
 
@@ -35,7 +35,7 @@ python3 Tools/OpportunityPipeline.py \
 
 ## What Stays Skill-Specific
 
-- customization lookup under `~/.claude/skills/PAI/USER/SKILLCUSTOMIZATIONS/SearchIntentAutomation/`
+- customization lookup under `<runtime-customization-dir>/SearchIntentAutomation/`
 - workflow routing from `SKILL.md`
 - agent-runtime conventions for loading local context files
 

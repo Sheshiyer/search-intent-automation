@@ -14,8 +14,15 @@ python -m pip install -e .[dev]
 
 ## Verify install
 
+For a PyPI install:
+
 ```bash
 search-intent-automation --version
 python -m search_intent_automation --help
+```
+
+For a source checkout or skill-install mode:
+
+```bash
 python Tools/OpportunityPipeline.py --help
 ```

@@ -10,6 +10,8 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+from . import __version__
+
 PROGRAM_NAME = "search-intent-automation"
 CUSTOM_DIRECTION_PROMPT = "Provide a custom direction to change the flow."
 
@@ -332,7 +334,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--version",
         action="version",
-        version="%(prog)s 0.1.0",
+        version=f"%(prog)s {__version__}",
     )
     return parser
 

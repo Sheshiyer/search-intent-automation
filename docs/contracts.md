@@ -15,6 +15,8 @@ See `Tools/CaptureStatusContract.md`.
 - `source_statuses`
 - `resume_hints`
 
+Sample artifact: `examples/checkpoint.sample.json`
+
 ## Success output
 
 `opportunity-map.json` contains:
@@ -28,3 +30,8 @@ See `Tools/CaptureStatusContract.md`.
 - `deferred_sources`
 - `review_required`
 - `opportunity_map`
+
+Sample artifacts:
+
+- `examples/opportunity-map.sample.json`
+- `examples/opportunity-map.partial.sample.json`

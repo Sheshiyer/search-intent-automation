@@ -1,6 +1,6 @@
 {
   "ubersuggest": {
-    "status": "auth-expired",
+    "status": "rate-limited",
     "artifact": null
   },
   "answer_the_public": {

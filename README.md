@@ -34,11 +34,12 @@ More setup options live in [docs/installation.md](docs/installation.md).
 Run the installed CLI:
 
 ```bash
+# create /tmp/search-intent-run/capture-status.json first
 search-intent-automation \
   --seed "local seo" \
   --goal "rank service pages" \
   --workdir /tmp/search-intent-run \
-  --capture-status-json examples/capture-status.success.json
+  --capture-status-json /tmp/search-intent-run/capture-status.json
 ```
 
 Module invocation is also supported:
@@ -53,13 +54,13 @@ If you want to use this repo as a skill source, keep the public package docs as 
 
 ## Compatibility path
 
-Existing automation that calls the old script path can continue using:
+If you are running from a source checkout or installed skill bundle, existing automation can continue using:
 
 ```bash
 python Tools/OpportunityPipeline.py --help
 ```
 
-That file is now a compatibility shim that forwards to the packaged CLI.
+That file is a compatibility shim and is not part of the PyPI wheel.
 
 ## Blocked-state contract
 
@@ -84,6 +85,7 @@ Only `recommended-2` or `custom:...` may continue as a partial run.
 ## Documentation
 
 - [Installation](docs/installation.md)
+- [Quickstart](docs/quickstart.md)
 - [Development](docs/development.md)
 - [Release](docs/release.md)
 - [Architecture](docs/architecture.md)

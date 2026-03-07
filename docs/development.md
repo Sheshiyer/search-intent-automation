@@ -17,6 +17,7 @@ mypy src
 pytest
 python -m build
 python -m twine check dist/*
+./scripts/smoke-examples.sh
 ```
 
 ## Layout

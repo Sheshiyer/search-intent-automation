@@ -1,0 +1,46 @@
+{
+  "status": "needs_user_direction",
+  "taxonomy": "rate-limited",
+  "seed": "search intent automation",
+  "goal": "build opportunity map",
+  "workdir": "/private/tmp/search-intent-blocked.bNFbIo",
+  "source_statuses": {
+    "ubersuggest": {
+      "status": "blocked",
+      "issue": "rate-limited"
+    },
+    "answer_the_public": {
+      "status": "ok",
+      "issue": null
+    }
+  },
+  "recommended_option_1": "Back off and retry after a cooling interval.",
+  "recommended_option_2": "Continue with partial data and mark the source deferred.",
+  "custom_direction": "Provide a custom direction to change the flow.",
+  "selected_direction": null,
+  "decision_prompt": {
+    "taxonomy": "rate-limited",
+    "options": [
+      {
+        "id": "recommended-1",
+        "label": "Back off and retry after a cooling interval."
+      },
+      {
+        "id": "recommended-2",
+        "label": "Continue with partial data and mark the source deferred."
+      },
+      {
+        "id": "custom",
+        "label": "Provide a custom direction to change the flow."
+      }
+    ]
+  },
+  "resume_hints": {
+    "recommended_1": "search-intent-automation\n  --resume-from-checkpoint \"/private/tmp/search-intent-blocked.bNFbIo/checkpoint.json\"\n  --direction recommended-1",
+    "recommended_2": "search-intent-automation\n  --resume-from-checkpoint \"/private/tmp/search-intent-blocked.bNFbIo/checkpoint.json\"\n  --direction recommended-2",
+    "custom": "search-intent-automation\n  --resume-from-checkpoint \"/private/tmp/search-intent-blocked.bNFbIo/checkpoint.json\"\n  --direction \"custom:YOUR-DIRECTION\"",
+    "resume_from": null
+  },
+  "exit_code": 32,
+  "generated_at": "2026-03-07T11:05:15.936886+00:00"
+}

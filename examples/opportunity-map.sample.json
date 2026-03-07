@@ -1,0 +1,60 @@
+{
+  "status": "ok",
+  "seed": "search intent automation",
+  "goal": "build opportunity map",
+  "direction": null,
+  "resumed_from_checkpoint": null,
+  "generated_at": "2026-03-07T11:05:15.896742+00:00",
+  "source_counts": {
+    "ubersuggest": 2,
+    "answer_the_public": 3
+  },
+  "source_statuses": {
+    "ubersuggest": {
+      "status": "ok",
+      "issue": null
+    },
+    "answer_the_public": {
+      "status": "ok",
+      "issue": null
+    }
+  },
+  "deferred_sources": [],
+  "review_required": false,
+  "opportunity_map": {
+    "keyword_rows": [
+      {
+        "source": "ubersuggest",
+        "keyword": "seo agency",
+        "volume": 1000
+      },
+      {
+        "source": "ubersuggest",
+        "keyword": "local seo services",
+        "volume": 500
+      }
+    ],
+    "question_rows": [
+      {
+        "source": "answer-the-public",
+        "question": "what is local seo",
+        "intent": "informational"
+      },
+      {
+        "source": "answer-the-public",
+        "question": "best local seo agency",
+        "intent": "comparative"
+      },
+      {
+        "source": "answer-the-public",
+        "question": "local seo cost",
+        "intent": "transactional"
+      }
+    ]
+  },
+  "notes": [
+    "Playwright MCP is responsible for browser capture.",
+    "This Python package handles deterministic downstream normalization and merging.",
+    "If blocked, use the checkpoint taxonomy instead of improvising hidden fallback logic."
+  ]
+}

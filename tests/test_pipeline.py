@@ -4,6 +4,7 @@ import json
 import os
 import subprocess
 import sys
+from importlib import metadata
 from pathlib import Path
 
 import pytest
@@ -142,6 +143,45 @@ def test_resume_partial_from_checkpoint(tmp_path: Path) -> None:
     assert output["deferred_sources"] == ["ubersuggest"]
 
 
+def test_low_signal_checkpoint_requires_direction(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    ubersuggest_path = tmp_path / "ubersuggest.json"
+    ubersuggest_path.write_text(
+        json.dumps({"rows": [{"keyword": "seo agency", "volume": 1000}]}),
+        encoding="utf-8",
+    )
+    manifest_path = tmp_path / "capture-status.json"
+    manifest_path.write_text(
+        json.dumps(
+            {
+                "ubersuggest": {"status": "ok", "artifact": str(ubersuggest_path)},
+                "answer_the_public": {"status": "ok", "artifact": None},
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    exit_code = main(
+        [
+            "--seed",
+            "local seo",
+            "--goal",
+            "build opportunity map",
+            "--workdir",
+            str(tmp_path),
+            "--capture-status-json",
+            str(manifest_path),
+        ]
+    )
+
+    captured = capsys.readouterr()
+    assert exit_code == 23
+    assert "taxonomy: low-signal-data" in captured.out
+    checkpoint = json.loads((tmp_path / "checkpoint.json").read_text(encoding="utf-8"))
+    assert checkpoint["taxonomy"] == "low-signal-data"
+
+
 def test_invalid_direction_is_rejected() -> None:
     with pytest.raises(SystemExit, match="Unsupported direction"):
         main(["--seed", "x", "--goal", "y", "--workdir", "/tmp/z", "--direction", "later"])
@@ -159,6 +199,7 @@ def test_module_invocation_reports_version() -> None:
         env=env,
     )
     assert __version__ in result.stdout
+    assert metadata.version("search-intent-automation") == __version__
 
 
 def test_compatibility_shim_runs(tmp_path: Path) -> None:

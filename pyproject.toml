@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "search-intent-automation"
-version = "0.1.0"
+dynamic = ["version"]
 description = "Deterministic search-intent automation with Playwright MCP capture and Python CLI orchestration"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -50,6 +50,9 @@ Issues = "https://github.com/Sheshiyer/search-intent-automation/issues"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/search_intent_automation"]
+
+[tool.hatch.version]
+path = "src/search_intent_automation/__init__.py"
 
 [tool.hatch.build.targets.sdist]
 include = [

@@ -2,25 +2,26 @@
 
 ## In Progress: Public Package Launch
 
-- [ ] Scaffold the Python package and move the pipeline code into `src/search_intent_automation`.
-- [ ] Add console entrypoints and keep `Tools/OpportunityPipeline.py` as a compatibility shim.
-- [ ] Add packaging metadata, Apache-2.0 licensing, governance docs, and public-facing README/docs.
-- [ ] Add unit, integration, and build verification tests.
-- [ ] Add GitHub Actions CI and release workflows with PyPI trusted publishing configuration.
-- [ ] Add examples, contract docs, and architecture/FAQ docs.
-- [ ] Create GitHub label taxonomy and wave/epic issues in `Sheshiyer/search-intent-automation`.
-- [ ] Make the repo public and push the implementation changes.
-- [ ] Update `System-MOC.md` and `Enneagram-Orchestration-MOC.md` with the new project link.
+- [x] Scaffold the Python package and move the pipeline code into `src/search_intent_automation`.
+- [x] Add console entrypoints and keep `Tools/OpportunityPipeline.py` as a compatibility shim.
+- [x] Add packaging metadata, Apache-2.0 licensing, governance docs, and public-facing README/docs.
+- [x] Add unit, integration, and build verification tests.
+- [x] Add GitHub Actions CI and release workflows with PyPI trusted publishing configuration.
+- [x] Add examples, contract docs, architecture/FAQ docs, sample outputs, and smoke scripts.
+- [x] Create GitHub label taxonomy and wave/epic issues in `Sheshiyer/search-intent-automation`.
+- [x] Make the repo public and push the implementation changes.
+- [x] Update `System-MOC.md` and `Enneagram-Orchestration-MOC.md` with the new project link.
+- [ ] Cut `v0.1.0` and verify the GitHub Release / PyPI publish path.
 
-## Current Slice: Docs And Governance
+## Current Slice: Release Completion
 
-- [ ] Reframe `README.md` for the public package audience and split skill-install guidance into dedicated docs.
-- [ ] Normalize owned docs to repo-local paths and installed CLI terminology, while keeping Make.com only as historical source context.
-- [ ] Add installation, development, release, architecture, and FAQ docs under `docs/`.
-- [ ] Add governance files: `LICENSE`, `CONTRIBUTING.md`, `SECURITY.md`, `CODE_OF_CONDUCT.md`, and `CHANGELOG.md`.
-- [ ] Add GitHub issue templates and template configuration under `.github/ISSUE_TEMPLATE/`.
-- [ ] Run markdown link/path sanity checks and capture the review notes below.
+- [ ] Push the final follow-up commit with doc/package hygiene fixes.
+- [ ] Create and push tag `v0.1.0`.
+- [ ] Inspect the `release.yml` run for GitHub Release artifact creation.
+- [ ] Confirm whether PyPI trusted publishing succeeds or stops on publisher registration.
 
 ## Review
 
-- Pending implementation for the docs/governance slice.
+- Repo implementation is public and verified locally.
+- GitHub wave issues created: `#1` through `#11`.
+- Remaining launch risk is external: GitHub release execution and PyPI trusted-publisher state.

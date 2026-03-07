@@ -22,9 +22,9 @@
 
 ## Current Slice: Patch Release v0.1.1
 
-- [ ] Bump version metadata to `0.1.1`.
-- [ ] Update changelog, README positioning, and release notes for the CLI hardening pass.
-- [ ] Rebuild and verify release artifacts locally.
+- [x] Bump version metadata to `0.1.1`.
+- [x] Update changelog, README positioning, and release notes for the CLI hardening pass.
+- [x] Rebuild and verify release artifacts locally.
 - [ ] Push `main`, create tag `v0.1.1`, and publish the GitHub release.
 - [ ] Update GitHub repo description to match the hardened CLI surface.
 
@@ -47,3 +47,4 @@
 - Remaining launch risk is external: PyPI trusted publisher is not registered and returns `invalid-publisher`.
 - Next implementation target is product hardening, not release plumbing.
 - CLI hardening pass completed: subcommands, contract validation, manifest-relative artifact resolution, docs/examples refresh, and clean-wheel install smoke all passed locally.
+- `v0.1.1` release payload is prepared and verified locally; remaining work is the GitHub push, repo metadata update, and release publication.

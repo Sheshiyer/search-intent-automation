@@ -15,13 +15,15 @@
 
 ## Current Slice: Release Completion
 
-- [ ] Push the final follow-up commit with doc/package hygiene fixes.
-- [ ] Create and push tag `v0.1.0`.
-- [ ] Inspect the `release.yml` run for GitHub Release artifact creation.
-- [ ] Confirm whether PyPI trusted publishing succeeds or stops on publisher registration.
+- [x] Push the final follow-up commit with doc/package hygiene fixes.
+- [x] Create and push tag `v0.1.0`.
+- [x] Inspect the `release.yml` run for GitHub Release artifact creation.
+- [x] Confirm that GitHub Release artifacts were created and PyPI trusted publishing is blocked on publisher registration.
 
 ## Review
 
 - Repo implementation is public and verified locally.
 - GitHub wave issues created: `#1` through `#11`.
-- Remaining launch risk is external: GitHub release execution and PyPI trusted-publisher state.
+- `main` CI is green on commit `dd08fba`.
+- GitHub Release `v0.1.0` exists with wheel and sdist assets.
+- Remaining launch risk is external: PyPI trusted publisher is not registered and returns `invalid-publisher`.

@@ -20,6 +20,14 @@
 - [x] Inspect the `release.yml` run for GitHub Release artifact creation.
 - [x] Confirm that GitHub Release artifacts were created and PyPI trusted publishing is blocked on publisher registration.
 
+## Current Slice: Patch Release v0.1.1
+
+- [ ] Bump version metadata to `0.1.1`.
+- [ ] Update changelog, README positioning, and release notes for the CLI hardening pass.
+- [ ] Rebuild and verify release artifacts locally.
+- [ ] Push `main`, create tag `v0.1.1`, and publish the GitHub release.
+- [ ] Update GitHub repo description to match the hardened CLI surface.
+
 ## Next Slice: CLI Hardening Pass
 
 - [x] Add manifest-relative artifact path resolution so `capture-status.json` can use relative file paths safely.

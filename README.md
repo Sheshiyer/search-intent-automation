@@ -4,7 +4,7 @@
 [![PyPI](https://img.shields.io/pypi/v/search-intent-automation.svg)](https://pypi.org/project/search-intent-automation/)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 
-Deterministic search-intent automation for coding agents.
+Deterministic search-intent automation for coding agents with validated JSON contracts, manifest-relative artifact handling, and resumable CLI subcommands.
 
 This project turns a seed topic into a repeatable research pipeline using:
 
@@ -28,6 +28,13 @@ python -m pip install -e .[dev]
 ```
 
 More setup options live in [docs/installation.md](docs/installation.md).
+
+## Primary commands
+
+- `search-intent-automation init --workdir ...`
+- `search-intent-automation validate --kind capture-status ...`
+- `search-intent-automation run --seed ... --goal ... --workdir ...`
+- `search-intent-automation resume --resume-from-checkpoint ... --direction ...`
 
 ## Public package mode
 

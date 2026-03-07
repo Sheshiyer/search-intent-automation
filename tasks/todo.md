@@ -11,7 +11,7 @@
 - [x] Create GitHub label taxonomy and wave/epic issues in `Sheshiyer/search-intent-automation`.
 - [x] Make the repo public and push the implementation changes.
 - [x] Update `System-MOC.md` and `Enneagram-Orchestration-MOC.md` with the new project link.
-- [ ] Cut `v0.1.0` and verify the GitHub Release / PyPI publish path.
+- [x] Cut `v0.1.0` and verify the GitHub Release / PyPI publish path.
 
 ## Current Slice: Release Completion
 
@@ -25,8 +25,8 @@
 - [x] Bump version metadata to `0.1.1`.
 - [x] Update changelog, README positioning, and release notes for the CLI hardening pass.
 - [x] Rebuild and verify release artifacts locally.
-- [ ] Push `main`, create tag `v0.1.1`, and publish the GitHub release.
-- [ ] Update GitHub repo description to match the hardened CLI surface.
+- [x] Push `main`, create tag `v0.1.1`, and publish the GitHub release.
+- [x] Update GitHub repo description to match the hardened CLI surface.
 
 ## Next Slice: CLI Hardening Pass
 
@@ -47,4 +47,5 @@
 - Remaining launch risk is external: PyPI trusted publisher is not registered and returns `invalid-publisher`.
 - Next implementation target is product hardening, not release plumbing.
 - CLI hardening pass completed: subcommands, contract validation, manifest-relative artifact resolution, docs/examples refresh, and clean-wheel install smoke all passed locally.
-- `v0.1.1` release payload is prepared and verified locally; remaining work is the GitHub push, repo metadata update, and release publication.
+- `v0.1.1` is published on GitHub with wheel and sdist assets, and the repo description now matches the hardened CLI surface.
+- The `Release` workflow still concludes with failure because the PyPI trusted publisher is not registered, but the GitHub Release step succeeds.

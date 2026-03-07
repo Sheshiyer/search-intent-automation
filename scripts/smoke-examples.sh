@@ -13,6 +13,7 @@ fi
 rm -rf "$success_dir" "$blocked_dir"
 
 "$python_bin" -m search_intent_automation \
+  run \
   --seed "search intent automation" \
   --goal "build opportunity map" \
   --workdir "$success_dir" \
@@ -20,6 +21,7 @@ rm -rf "$success_dir" "$blocked_dir"
 
 set +e
 "$python_bin" -m search_intent_automation \
+  run \
   --seed "search intent automation" \
   --goal "build opportunity map" \
   --workdir "$blocked_dir" \
@@ -33,6 +35,7 @@ if [[ "$blocked_exit" -ne 32 ]]; then
 fi
 
 "$python_bin" -m search_intent_automation \
+  resume \
   --resume-from-checkpoint "$blocked_dir/checkpoint.json" \
   --capture-status-json "$repo_root/examples/capture-status.blocked.json" \
   --direction recommended-2

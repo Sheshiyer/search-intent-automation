@@ -25,5 +25,6 @@ If your runtime loads local skill folders directly, use this file as the entrypo
 
 - Capture browser-only research data with Playwright MCP.
 - Hand off results through `capture-status.json`.
-- Run the installed CLI or `python Tools/OpportunityPipeline.py`.
+- Use `search-intent-automation init`, `validate`, `run`, and `resume` as the primary command surface.
+- Use `python Tools/OpportunityPipeline.py run ...` only as the compatibility path for skill-style installs.
 - If blocked, present `taxonomy`, `recommended option 1`, `recommended option 2`, and `custom direction`.

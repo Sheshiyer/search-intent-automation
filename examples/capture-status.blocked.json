@@ -5,6 +5,6 @@
   },
   "answer_the_public": {
     "status": "ok",
-    "artifact": "examples/answer-the-public.sample.csv"
+    "artifact": "answer-the-public.sample.csv"
   }
 }

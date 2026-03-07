@@ -18,11 +18,12 @@ For a PyPI install:
 
 ```bash
 search-intent-automation --version
-python -m search_intent_automation --help
+search-intent-automation --help
+python -m search_intent_automation run --help
 ```
 
 For a source checkout or skill-install mode:
 
 ```bash
-python Tools/OpportunityPipeline.py --help
+python Tools/OpportunityPipeline.py run --help
 ```

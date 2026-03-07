@@ -18,8 +18,12 @@ Blocked states emit `checkpoint.json` and print:
 Use:
 
 ```bash
-search-intent-automation \
+search-intent-automation resume \
   --resume-from-checkpoint /path/to/checkpoint.json \
   --capture-status-json /path/to/capture-status.json \
   --direction recommended-2
 ```
+
+## How are artifact paths resolved?
+
+If `capture-status.json` contains relative artifact paths, they are resolved relative to that manifest file. Absolute paths still work as-is.

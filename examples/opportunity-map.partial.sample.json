@@ -3,8 +3,8 @@
   "seed": "search intent automation",
   "goal": "build opportunity map",
   "direction": "recommended-2",
-  "resumed_from_checkpoint": "/private/tmp/search-intent-blocked.bNFbIo/checkpoint.json",
-  "generated_at": "2026-03-07T11:05:15.975657+00:00",
+  "resumed_from_checkpoint": "/private/var/folders/zx/_wycnwwx3p1f_4gclpnhr8rm0000gn/T/sia-blocked-sample/checkpoint.json",
+  "generated_at": "2026-03-07T16:55:31.145844+00:00",
   "source_counts": {
     "ubersuggest": 0,
     "answer_the_public": 3

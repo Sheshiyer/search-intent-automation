@@ -20,6 +20,16 @@
 - [x] Inspect the `release.yml` run for GitHub Release artifact creation.
 - [x] Confirm that GitHub Release artifacts were created and PyPI trusted publishing is blocked on publisher registration.
 
+## Next Slice: CLI Hardening Pass
+
+- [x] Add manifest-relative artifact path resolution so `capture-status.json` can use relative file paths safely.
+- [x] Add JSON contract validation for capture manifests, checkpoints, and opportunity maps.
+- [x] Refactor the flat CLI into explicit `run`, `resume`, `validate`, and `init` subcommands.
+- [x] Preserve compatibility behavior for `python Tools/OpportunityPipeline.py ...` and sensible default invocation.
+- [x] Update tests to cover subcommands, schema validation failures, and relative artifact resolution.
+- [x] Update examples and docs to match the new command surface.
+- [x] Re-run lint, typecheck, tests, build, twine, smoke, and wheel-install checks.
+
 ## Review
 
 - Repo implementation is public and verified locally.
@@ -27,3 +37,5 @@
 - `main` CI is green on commit `dd08fba`.
 - GitHub Release `v0.1.0` exists with wheel and sdist assets.
 - Remaining launch risk is external: PyPI trusted publisher is not registered and returns `invalid-publisher`.
+- Next implementation target is product hardening, not release plumbing.
+- CLI hardening pass completed: subcommands, contract validation, manifest-relative artifact resolution, docs/examples refresh, and clean-wheel install smoke all passed locally.

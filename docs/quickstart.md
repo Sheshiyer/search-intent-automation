@@ -4,32 +4,31 @@ Use the package with a local capture-status manifest, or use the bundled example
 
 ## Package-only quickstart
 
-Create a manifest at `/tmp/search-intent-demo-success/capture-status.json`:
-
-```json
-{
-  "ubersuggest": {
-    "status": "ok",
-    "artifact": "/tmp/search-intent-demo-success/ubersuggest.json"
-  },
-  "answer_the_public": {
-    "status": "ok",
-    "artifact": "/tmp/search-intent-demo-success/answer-the-public.json"
-  }
-}
-```
-
-Then point the CLI at that file:
+Initialize a runnable workdir:
 
 ```bash
-search-intent-automation \
+search-intent-automation init --workdir /tmp/search-intent-demo-success
+```
+
+Validate the generated manifest:
+
+```bash
+search-intent-automation validate \
+  --kind capture-status \
+  /tmp/search-intent-demo-success/capture-status.json
+```
+
+Run the pipeline:
+
+```bash
+search-intent-automation run \
   --seed "search intent automation" \
   --goal "build opportunity map" \
   --workdir /tmp/search-intent-demo-success \
   --capture-status-json /tmp/search-intent-demo-success/capture-status.json
 ```
 
-The artifact files referenced by that manifest must already exist.
+The artifact files referenced by that manifest must already exist. Relative artifact paths are resolved from the manifest directory, not from your shell working directory.
 
 ## Source checkout quickstart
 
@@ -38,7 +37,7 @@ If you have the repository checked out, you can use the bundled example manifest
 ### Success path
 
 ```bash
-search-intent-automation \
+search-intent-automation run \
   --seed "search intent automation" \
   --goal "build opportunity map" \
   --workdir /tmp/search-intent-demo-success \
@@ -53,7 +52,7 @@ Expected output:
 ### Blocked path
 
 ```bash
-search-intent-automation \
+search-intent-automation run \
   --seed "search intent automation" \
   --goal "build opportunity map" \
   --workdir /tmp/search-intent-demo-blocked \
@@ -69,7 +68,7 @@ Expected output:
 ### Resume with partial continuation
 
 ```bash
-search-intent-automation \
+search-intent-automation resume \
   --resume-from-checkpoint /tmp/search-intent-demo-blocked/checkpoint.json \
   --capture-status-json examples/capture-status.blocked.json \
   --direction recommended-2

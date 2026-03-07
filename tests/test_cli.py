@@ -39,13 +39,20 @@ def write_capture_status(
 
 def run_console(*args: str, cwd: Path) -> subprocess.CompletedProcess[str]:
     script = Path(sys.executable).with_name("search-intent-automation")
-    assert script.exists(), "search-intent-automation entrypoint is not installed"
+    env = os.environ.copy()
+    env["PYTHONPATH"] = str(Path(__file__).resolve().parents[1] / "src")
+    command: list[str]
+    if script.exists():
+        command = [str(script), *args]
+    else:
+        command = [sys.executable, "-m", "search_intent_automation", *args]
     return subprocess.run(
-        [str(script), *args],
+        command,
         cwd=cwd,
         text=True,
         capture_output=True,
         check=False,
+        env=env,
     )
 
 
@@ -82,6 +89,7 @@ def test_console_entrypoint_writes_opportunity_map(tmp_path: Path) -> None:
     _, _, capture_status = build_success_fixture(workdir)
 
     result = run_console(
+        "run",
         "--seed",
         "search intent automation",
         "--goal",
@@ -126,6 +134,7 @@ def test_console_entrypoint_writes_checkpoint_when_capture_is_blocked(
     )
 
     result = run_console(
+        "run",
         "--seed",
         "search intent automation",
         "--goal",
@@ -171,6 +180,7 @@ def test_console_entrypoint_resumes_from_checkpoint_with_direction(
     )
 
     initial = run_console(
+        "run",
         "--seed",
         "search intent automation",
         "--goal",
@@ -186,6 +196,7 @@ def test_console_entrypoint_resumes_from_checkpoint_with_direction(
     assert checkpoint_path.exists()
 
     resumed = run_console(
+        "resume",
         "--resume-from-checkpoint",
         str(checkpoint_path),
         "--capture-status-json",
@@ -201,6 +212,43 @@ def test_console_entrypoint_resumes_from_checkpoint_with_direction(
     assert output["direction"] == "recommended-2"
     assert output["deferred_sources"] == ["ubersuggest"]
     assert output["resumed_from_checkpoint"] == str(checkpoint_path.resolve())
+
+
+def test_console_validate_and_init_subcommands(tmp_path: Path) -> None:
+    workdir = tmp_path / "initialized"
+    init_result = run_console("init", "--workdir", str(workdir), cwd=tmp_path)
+    assert init_result.returncode == 0, init_result.stderr
+
+    validate_result = run_console(
+        "validate",
+        "--kind",
+        "capture-status",
+        str(workdir / "capture-status.json"),
+        cwd=tmp_path,
+    )
+    assert validate_result.returncode == 0, validate_result.stderr
+    assert "capture-status contract is valid" in validate_result.stdout
+
+
+def test_flat_cli_invocation_still_routes_to_run(tmp_path: Path) -> None:
+    workdir = tmp_path / "run"
+    workdir.mkdir()
+    _, _, capture_status = build_success_fixture(workdir)
+
+    result = run_console(
+        "--seed",
+        "search intent automation",
+        "--goal",
+        "build opportunity map",
+        "--workdir",
+        str(workdir),
+        "--capture-status-json",
+        str(capture_status),
+        cwd=workdir,
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert (workdir / "opportunity-map.json").exists()
 
 
 def test_compatibility_shim_runs_without_site_packages(tmp_path: Path) -> None:

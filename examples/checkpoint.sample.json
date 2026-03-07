@@ -3,7 +3,7 @@
   "taxonomy": "rate-limited",
   "seed": "search intent automation",
   "goal": "build opportunity map",
-  "workdir": "/private/tmp/search-intent-blocked.bNFbIo",
+  "workdir": "/private/var/folders/zx/_wycnwwx3p1f_4gclpnhr8rm0000gn/T/sia-blocked-sample",
   "source_statuses": {
     "ubersuggest": {
       "status": "blocked",
@@ -36,11 +36,11 @@
     ]
   },
   "resume_hints": {
-    "recommended_1": "search-intent-automation\n  --resume-from-checkpoint \"/private/tmp/search-intent-blocked.bNFbIo/checkpoint.json\"\n  --direction recommended-1",
-    "recommended_2": "search-intent-automation\n  --resume-from-checkpoint \"/private/tmp/search-intent-blocked.bNFbIo/checkpoint.json\"\n  --direction recommended-2",
-    "custom": "search-intent-automation\n  --resume-from-checkpoint \"/private/tmp/search-intent-blocked.bNFbIo/checkpoint.json\"\n  --direction \"custom:YOUR-DIRECTION\"",
+    "recommended_1": "search-intent-automation\n  resume\n  --resume-from-checkpoint \"/private/var/folders/zx/_wycnwwx3p1f_4gclpnhr8rm0000gn/T/sia-blocked-sample/checkpoint.json\"\n  --direction recommended-1",
+    "recommended_2": "search-intent-automation\n  resume\n  --resume-from-checkpoint \"/private/var/folders/zx/_wycnwwx3p1f_4gclpnhr8rm0000gn/T/sia-blocked-sample/checkpoint.json\"\n  --direction recommended-2",
+    "custom": "search-intent-automation\n  resume\n  --resume-from-checkpoint \"/private/var/folders/zx/_wycnwwx3p1f_4gclpnhr8rm0000gn/T/sia-blocked-sample/checkpoint.json\"\n  --direction \"custom:YOUR-DIRECTION\"",
     "resume_from": null
   },
   "exit_code": 32,
-  "generated_at": "2026-03-07T11:05:15.936886+00:00"
+  "generated_at": "2026-03-07T16:55:31.092124+00:00"
 }

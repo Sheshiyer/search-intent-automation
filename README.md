@@ -34,18 +34,23 @@ More setup options live in [docs/installation.md](docs/installation.md).
 Run the installed CLI:
 
 ```bash
-# create /tmp/search-intent-run/capture-status.json first
-search-intent-automation \
+search-intent-automation init --workdir /tmp/search-intent-run
+search-intent-automation validate \
+  --kind capture-status \
+  /tmp/search-intent-run/capture-status.json
+search-intent-automation run \
   --seed "local seo" \
   --goal "rank service pages" \
   --workdir /tmp/search-intent-run \
   --capture-status-json /tmp/search-intent-run/capture-status.json
 ```
 
+Artifact paths inside `capture-status.json` resolve relative to the manifest file when they are not absolute paths.
+
 Module invocation is also supported:
 
 ```bash
-python -m search_intent_automation --help
+python -m search_intent_automation run --help
 ```
 
 ## Skill mode
@@ -57,7 +62,7 @@ If you want to use this repo as a skill source, keep the public package docs as 
 If you are running from a source checkout or installed skill bundle, existing automation can continue using:
 
 ```bash
-python Tools/OpportunityPipeline.py --help
+python Tools/OpportunityPipeline.py run --help
 ```
 
 That file is a compatibility shim and is not part of the PyPI wheel.

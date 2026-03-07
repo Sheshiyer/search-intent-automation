@@ -7,10 +7,12 @@
 ## Highlights
 
 - packaged CLI: `search-intent-automation`
-- module entrypoint: `python -m search_intent_automation`
+- module entrypoint: `python -m search_intent_automation <subcommand>`
 - compatibility shim: `Tools/OpportunityPipeline.py`
+- explicit subcommands: `run`, `resume`, `validate`, `init`
 - checkpoint taxonomy for blocked browser states
 - sample manifests, sample outputs, and smoke script
+- manifest-relative artifact resolution for shipped examples and captured runs
 - CI, release workflow, and PyPI trusted publishing scaffolding
 
 ## Included Docs

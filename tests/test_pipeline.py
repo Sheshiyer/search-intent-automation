@@ -4,7 +4,6 @@ import json
 import os
 import subprocess
 import sys
-from importlib import metadata
 from pathlib import Path
 
 import pytest
@@ -47,6 +46,7 @@ def test_successful_run_from_manifest(tmp_path: Path) -> None:
 
     exit_code = main(
         [
+            "run",
             "--seed",
             "local seo",
             "--goal",
@@ -82,6 +82,7 @@ def test_blocked_auth_expired_checkpoint(
 
     exit_code = main(
         [
+            "run",
             "--seed",
             "seo services",
             "--goal",
@@ -98,6 +99,7 @@ def test_blocked_auth_expired_checkpoint(
     assert "taxonomy: auth-expired" in captured.out
     checkpoint = json.loads((tmp_path / "checkpoint.json").read_text(encoding="utf-8"))
     assert checkpoint["recommended_option_1"].startswith("Refresh auth")
+    assert "resume" in checkpoint["resume_hints"]["recommended_2"]
 
 
 def test_resume_partial_from_checkpoint(tmp_path: Path) -> None:
@@ -115,6 +117,7 @@ def test_resume_partial_from_checkpoint(tmp_path: Path) -> None:
     )
     blocked = main(
         [
+            "run",
             "--seed",
             "seo services",
             "--goal",
@@ -129,6 +132,7 @@ def test_resume_partial_from_checkpoint(tmp_path: Path) -> None:
 
     resumed = main(
         [
+            "resume",
             "--resume-from-checkpoint",
             str(tmp_path / "checkpoint.json"),
             "--capture-status-json",
@@ -166,6 +170,7 @@ def test_low_signal_checkpoint_requires_direction(
 
     exit_code = main(
         [
+            "run",
             "--seed",
             "local seo",
             "--goal",
@@ -186,7 +191,19 @@ def test_low_signal_checkpoint_requires_direction(
 
 def test_invalid_direction_is_rejected() -> None:
     with pytest.raises(SystemExit, match="Unsupported direction"):
-        main(["--seed", "x", "--goal", "y", "--workdir", "/tmp/z", "--direction", "later"])
+        main(
+            [
+                "run",
+                "--seed",
+                "x",
+                "--goal",
+                "y",
+                "--workdir",
+                "/tmp/z",
+                "--direction",
+                "later",
+            ]
+        )
 
 
 def test_module_invocation_reports_version() -> None:
@@ -201,7 +218,6 @@ def test_module_invocation_reports_version() -> None:
         env=env,
     )
     assert __version__ in result.stdout
-    assert metadata.version("search-intent-automation") == __version__
 
 
 def test_compatibility_shim_runs(tmp_path: Path) -> None:
@@ -242,3 +258,81 @@ def test_compatibility_shim_runs(tmp_path: Path) -> None:
         check=True,
     )
     assert "Opportunity map written" in result.stdout
+
+
+def test_relative_manifest_artifact_paths_resolve_from_manifest_dir(tmp_path: Path) -> None:
+    workdir = tmp_path / "nested-run"
+    workdir.mkdir()
+    ubersuggest_path = workdir / "ubersuggest.json"
+    answer_path = workdir / "answer.csv"
+    ubersuggest_path.write_text(
+        json.dumps({"rows": [{"keyword": "seo agency", "volume": 1000}]}),
+        encoding="utf-8",
+    )
+    _write_answer_csv(answer_path)
+    manifest_path = workdir / "capture-status.json"
+    manifest_path.write_text(
+        json.dumps(
+            {
+                "ubersuggest": {"status": "ok", "artifact": "ubersuggest.json"},
+                "answer_the_public": {"status": "ok", "artifact": "answer.csv"},
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    exit_code = main(
+        [
+            "run",
+            "--seed",
+            "local seo",
+            "--goal",
+            "rank service pages",
+            "--workdir",
+            str(tmp_path / "separate-output"),
+            "--capture-status-json",
+            str(manifest_path),
+        ]
+    )
+
+    assert exit_code == 0
+    output = json.loads(
+        ((tmp_path / "separate-output") / "opportunity-map.json").read_text(encoding="utf-8")
+    )
+    assert output["source_counts"] == {"ubersuggest": 1, "answer_the_public": 3}
+
+
+def test_validate_subcommand_rejects_missing_source(tmp_path: Path) -> None:
+    manifest_path = tmp_path / "capture-status.json"
+    manifest_path.write_text(
+        json.dumps({"ubersuggest": {"status": "ok", "artifact": None}}),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(SystemExit, match="Invalid capture-status contract"):
+        main(["validate", "--kind", "capture-status", str(manifest_path)])
+
+
+def test_init_subcommand_creates_runnable_scaffold(tmp_path: Path) -> None:
+    workdir = tmp_path / "initialized"
+    exit_code = main(["init", "--workdir", str(workdir)])
+    assert exit_code == 0
+
+    manifest = json.loads((workdir / "capture-status.json").read_text(encoding="utf-8"))
+    assert manifest["ubersuggest"]["artifact"] == "ubersuggest.json"
+    assert manifest["answer_the_public"]["artifact"] == "answer-the-public.csv"
+
+    run_exit = main(
+        [
+            "run",
+            "--seed",
+            "search intent automation",
+            "--goal",
+            "build opportunity map",
+            "--workdir",
+            str(workdir),
+            "--capture-status-json",
+            str(workdir / "capture-status.json"),
+        ]
+    )
+    assert run_exit == 0

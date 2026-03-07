@@ -18,7 +18,7 @@ Write a JSON file such as:
 {
   "ubersuggest": {
     "status": "ok",
-    "artifact": "/path/to/run/ubersuggest.csv"
+    "artifact": "ubersuggest.csv"
   },
   "answer_the_public": {
     "status": "rate-limited",
@@ -48,6 +48,7 @@ Use these exact source keys:
 
 - If `status` is `ok`, `artifact` should point to the file Playwright saved.
 - If `status` is not `ok`, `artifact` can be omitted or set to `null`.
+- Relative artifact paths are resolved from the directory containing `capture-status.json`.
 - Preferred filenames:
   - `ubersuggest.json` or `ubersuggest.csv`
   - `answer-the-public.json` or `answer-the-public.csv`
@@ -66,7 +67,7 @@ Use these exact source keys:
 Run:
 
 ```bash
-search-intent-automation \
+search-intent-automation run \
   --seed "SEED" \
   --goal "GOAL" \
   --workdir /path/to/run \
@@ -76,7 +77,7 @@ search-intent-automation \
 Or use the repo-local compatibility script:
 
 ```bash
-python3 Tools/OpportunityPipeline.py \
+python3 Tools/OpportunityPipeline.py run \
   --seed "SEED" \
   --goal "GOAL" \
   --workdir /path/to/run \

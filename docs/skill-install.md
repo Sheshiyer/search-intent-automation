@@ -20,18 +20,20 @@ Use this document only when the repository is installed as a skill bundle for an
 From the installed skill root, use the compatibility script directly:
 
 ```bash
-python3 Tools/OpportunityPipeline.py --help
+python3 Tools/OpportunityPipeline.py run --help
 ```
 
 Run example:
 
 ```bash
-python3 Tools/OpportunityPipeline.py \
+python3 Tools/OpportunityPipeline.py run \
   --seed "local seo" \
   --goal "rank service pages" \
   --workdir /tmp/search-intent-run \
   --capture-status-json /tmp/search-intent-run/capture-status.json
 ```
+
+Relative artifact paths inside `capture-status.json` resolve from the manifest file location, so skill runtimes do not need to `cd` into the run directory before execution.
 
 ## What Stays Skill-Specific
 

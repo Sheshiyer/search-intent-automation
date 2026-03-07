@@ -14,7 +14,7 @@ Use this workflow when you want to turn a single seed topic, product, service, o
 2. Pull audience-language data with AnswerThePublic.
 3. Use Playwright MCP for gated browser capture.
 4. Write `capture-status.json` following `Tools/CaptureStatusContract.md`.
-5. Run the installed CLI or `python Tools/OpportunityPipeline.py`.
+5. Run `search-intent-automation run ...` or `python Tools/OpportunityPipeline.py run ...`.
 6. If blocked, present the taxonomy and the three decision branches.
 
 ## Deliverables

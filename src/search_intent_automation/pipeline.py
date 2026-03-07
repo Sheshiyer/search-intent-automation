@@ -5,15 +5,43 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import sys
 from collections.abc import Sequence
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any
 
 from . import __version__
+from .contracts import (
+    KNOWN_SOURCES,
+    CaptureManifest,
+    JsonMap,
+    SourceState,
+    validate_capture_manifest,
+    validate_checkpoint_payload,
+    validate_opportunity_map,
+)
 
 PROGRAM_NAME = "search-intent-automation"
 CUSTOM_DIRECTION_PROMPT = "Provide a custom direction to change the flow."
+OUTPUT_STATUSES = ("ok", "partial", "review_required", "partial_review_required")
+SUBCOMMANDS = frozenset({"run", "resume", "validate", "init"})
+RUN_COMPAT_FLAGS = frozenset(
+    {
+        "--seed",
+        "--goal",
+        "--workdir",
+        "--capture-status-json",
+        "--ubersuggest-input",
+        "--answer-input",
+        "--ubersuggest-status",
+        "--answer-status",
+        "--output-json",
+        "--checkpoint-json",
+        "--direction",
+        "--resume-from-checkpoint",
+    }
+)
+VALIDATE_KINDS = ("capture-status", "checkpoint", "opportunity-map")
 
 ISSUE_RECOMMENDATIONS: dict[str, tuple[str, str]] = {
     "auth-expired": (
@@ -53,9 +81,30 @@ EXIT_CODES = {
     "low-signal-data": 23,
 }
 
-SourceState = dict[str, str | None]
-CaptureManifest = dict[str, Any]
-JsonMap = dict[str, Any]
+INIT_UBERSUGGEST_SAMPLE = {
+    "rows": [
+        {"keyword": "search intent automation", "volume": 250},
+    ]
+}
+INIT_ANSWER_SAMPLE = (
+    "question,intent\n"
+    "what is search intent automation,informational\n"
+    "how to automate search intent clustering,informational\n"
+)
+INIT_CAPTURE_STATUS = {
+    "ubersuggest": {"status": "ok", "artifact": "ubersuggest.json"},
+    "answer_the_public": {"status": "ok", "artifact": "answer-the-public.csv"},
+}
+
+
+def resolve_path(path: Path, *, base_dir: Path | None = None) -> Path:
+    """Resolve a path, optionally relative to a base directory."""
+    expanded = path.expanduser()
+    if expanded.is_absolute():
+        return expanded.resolve()
+    if base_dir is not None:
+        return (base_dir / expanded).resolve()
+    return expanded.resolve()
 
 
 def load_artifact(path: Path) -> object:
@@ -67,6 +116,12 @@ def load_artifact(path: Path) -> object:
         with path.open(encoding="utf-8", newline="") as handle:
             return list(csv.DictReader(handle))
     raise ValueError(f"Unsupported artifact format: {path}")
+
+
+def write_json(path: Path, payload: JsonMap) -> None:
+    """Write a formatted JSON payload."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
 
 
 def checkpoint_payload(
@@ -83,8 +138,8 @@ def checkpoint_payload(
     option_1, option_2 = ISSUE_RECOMMENDATIONS[issue]
     resume_stub = [
         PROGRAM_NAME,
+        "  resume",
         f'  --resume-from-checkpoint "{workdir / "checkpoint.json"}"',
-        "  --direction recommended-1",
     ]
     return {
         "status": "needs_user_direction",
@@ -106,12 +161,10 @@ def checkpoint_payload(
             ],
         },
         "resume_hints": {
-            "recommended_1": "\n".join(resume_stub),
-            "recommended_2": "\n".join(
-                resume_stub[:-1] + ["  --direction recommended-2"]
-            ),
+            "recommended_1": "\n".join(resume_stub + ["  --direction recommended-1"]),
+            "recommended_2": "\n".join(resume_stub + ["  --direction recommended-2"]),
             "custom": "\n".join(
-                resume_stub[:-1] + ['  --direction "custom:YOUR-DIRECTION"']
+                resume_stub + ['  --direction "custom:YOUR-DIRECTION"']
             ),
             "resume_from": str(resume_from) if resume_from else None,
         },
@@ -122,13 +175,13 @@ def checkpoint_payload(
 
 def write_checkpoint(path: Path, payload: JsonMap) -> None:
     """Write a checkpoint file and mirror the decision prompt to stdout."""
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
-    print(f"STUCK [{payload['taxonomy']}]")
-    print(f"taxonomy: {payload['taxonomy']}")
-    print(f"recommended option 1: {payload['recommended_option_1']}")
-    print(f"recommended option 2: {payload['recommended_option_2']}")
-    print(f"custom direction: {payload['custom_direction']}")
+    validated = validate_checkpoint_payload(payload, valid_issues=VALID_ISSUES)
+    write_json(path, validated)
+    print(f"STUCK [{validated['taxonomy']}]")
+    print(f"taxonomy: {validated['taxonomy']}")
+    print(f"recommended option 1: {validated['recommended_option_1']}")
+    print(f"recommended option 2: {validated['recommended_option_2']}")
+    print(f"custom direction: {validated['custom_direction']}")
     print(f"Checkpoint written to: {path}")
 
 
@@ -209,29 +262,15 @@ def can_continue(issue: str, direction: str | None, valid_source_count: int) -> 
 
 
 def load_checkpoint(path: Path) -> JsonMap:
-    """Load a checkpoint file."""
+    """Load and validate a checkpoint file."""
     data = json.loads(path.read_text(encoding="utf-8"))
-    if not isinstance(data, dict):
-        raise ValueError("Checkpoint file must contain a JSON object.")
-    return data
+    return validate_checkpoint_payload(data, valid_issues=VALID_ISSUES)
 
 
 def load_capture_status(path: Path) -> CaptureManifest:
-    """Load a Playwright capture-status manifest."""
-    manifest = json.loads(path.read_text(encoding="utf-8"))
-    if not isinstance(manifest, dict):
-        raise ValueError("Capture status manifest must be a JSON object.")
-    return manifest
-
-
-def manifest_entry(manifest: CaptureManifest, source_name: str) -> JsonMap:
-    """Normalize a single capture manifest entry."""
-    raw_entry = manifest.get(source_name, {})
-    if isinstance(raw_entry, str):
-        return {"status": raw_entry}
-    if isinstance(raw_entry, dict):
-        return raw_entry
-    return {}
+    """Load and validate a Playwright capture-status manifest."""
+    data = json.loads(path.read_text(encoding="utf-8"))
+    return validate_capture_manifest(data, valid_statuses=VALID_SOURCE_STATUSES)
 
 
 def build_output(
@@ -279,16 +318,8 @@ def build_output(
     }
 
 
-def build_parser() -> argparse.ArgumentParser:
-    """Build the CLI parser."""
-    parser = argparse.ArgumentParser(description="Search Intent Automation pipeline.")
-    parser.add_argument("--seed", help="Seed topic or offer.")
-    parser.add_argument("--goal", help="Primary goal for the run.")
-    parser.add_argument(
-        "--workdir",
-        type=Path,
-        help="Run directory for outputs and checkpoints.",
-    )
+def add_shared_execution_arguments(parser: argparse.ArgumentParser) -> None:
+    """Add shared file/status arguments to a subcommand parser."""
     parser.add_argument(
         "--ubersuggest-input",
         type=Path,
@@ -310,10 +341,6 @@ def build_parser() -> argparse.ArgumentParser:
         help="Output file for checkpoint JSON when blocked.",
     )
     parser.add_argument(
-        "--direction",
-        help="Direction override: recommended-1, recommended-2, or custom:<text>",
-    )
-    parser.add_argument(
         "--ubersuggest-status",
         help=f"Capture status for Ubersuggest: {', '.join(VALID_SOURCE_STATUSES)}",
     )
@@ -322,32 +349,116 @@ def build_parser() -> argparse.ArgumentParser:
         help=f"Capture status for AnswerThePublic: {', '.join(VALID_SOURCE_STATUSES)}",
     )
     parser.add_argument(
-        "--resume-from-checkpoint",
-        type=Path,
-        help="Resume from an existing checkpoint JSON file.",
-    )
-    parser.add_argument(
         "--capture-status-json",
         type=Path,
         help="Path to a Playwright-generated capture status manifest JSON.",
     )
+
+
+def build_parser() -> argparse.ArgumentParser:
+    """Build the CLI parser."""
+    parser = argparse.ArgumentParser(description="Search Intent Automation pipeline.")
     parser.add_argument(
         "--version",
         action="version",
         version=f"%(prog)s {__version__}",
     )
+    subparsers = parser.add_subparsers(dest="command", metavar="command")
+
+    run_parser = subparsers.add_parser(
+        "run",
+        help="Merge captured source artifacts into an opportunity map.",
+    )
+    run_parser.add_argument("--seed", required=True, help="Seed topic or offer.")
+    run_parser.add_argument("--goal", required=True, help="Primary goal for the run.")
+    run_parser.add_argument(
+        "--workdir",
+        type=Path,
+        required=True,
+        help="Run directory for outputs and checkpoints.",
+    )
+    run_parser.add_argument(
+        "--direction",
+        help="Direction override: recommended-1, recommended-2, or custom:<text>",
+    )
+    add_shared_execution_arguments(run_parser)
+    run_parser.set_defaults(command_fn=run_command)
+
+    resume_parser = subparsers.add_parser("resume", help="Resume from an existing checkpoint.")
+    resume_parser.add_argument(
+        "--resume-from-checkpoint",
+        type=Path,
+        required=True,
+        help="Resume from an existing checkpoint JSON file.",
+    )
+    resume_parser.add_argument("--seed", help="Override the checkpoint seed.")
+    resume_parser.add_argument("--goal", help="Override the checkpoint goal.")
+    resume_parser.add_argument(
+        "--workdir",
+        type=Path,
+        help="Override the checkpoint workdir.",
+    )
+    resume_parser.add_argument(
+        "--direction",
+        help="Direction override: recommended-1, recommended-2, or custom:<text>",
+    )
+    add_shared_execution_arguments(resume_parser)
+    resume_parser.set_defaults(command_fn=resume_command)
+
+    validate_parser = subparsers.add_parser("validate", help="Validate a JSON contract file.")
+    validate_parser.add_argument(
+        "--kind",
+        choices=VALIDATE_KINDS,
+        required=True,
+        help="Contract kind to validate.",
+    )
+    validate_parser.add_argument("path", type=Path, help="Path to the JSON contract file.")
+    validate_parser.set_defaults(command_fn=validate_command)
+
+    init_parser = subparsers.add_parser("init", help="Create a runnable workdir scaffold.")
+    init_parser.add_argument(
+        "--workdir",
+        type=Path,
+        required=True,
+        help="Directory to initialize.",
+    )
+    init_parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Overwrite scaffold files in an existing directory.",
+    )
+    init_parser.set_defaults(command_fn=init_command)
     return parser
 
 
-def main(argv: Sequence[str] | None = None) -> int:
-    """CLI entrypoint."""
-    parser = build_parser()
-    args = parser.parse_args(list(argv) if argv is not None else None)
+def normalize_command_argv(argv: Sequence[str] | None) -> list[str]:
+    """Inject compatibility commands for legacy flat invocation."""
+    args = list(argv) if argv is not None else []
+    if not args:
+        return args
+    if args[0] in SUBCOMMANDS:
+        return args
+    if args[0] in {"-h", "--help", "--version"}:
+        return args
+    if "--resume-from-checkpoint" in args:
+        return ["resume", *args]
+    if any(arg in RUN_COMPAT_FLAGS for arg in args):
+        return ["run", *args]
+    return args
 
-    resumed_from: Path | None = None
+
+def resolve_manifest_artifact(entry: JsonMap, *, manifest_path: Path) -> Path | None:
+    """Resolve a manifest artifact path relative to the manifest location."""
+    artifact = entry.get("artifact")
+    if artifact is None:
+        return None
+    return resolve_path(Path(str(artifact)), base_dir=manifest_path.parent)
+
+
+def execute_pipeline(args: argparse.Namespace, *, resumed_from: Path | None = None) -> int:
+    """Run the pipeline using parsed CLI arguments."""
     checkpoint_state: JsonMap | None = None
-    if args.resume_from_checkpoint:
-        resumed_from = args.resume_from_checkpoint.expanduser().resolve()
+    if resumed_from is not None:
         checkpoint_state = load_checkpoint(resumed_from)
 
     seed = args.seed or (str(checkpoint_state["seed"]) if checkpoint_state else None)
@@ -360,15 +471,15 @@ def main(argv: Sequence[str] | None = None) -> int:
             "Seed, goal, and workdir are required unless --resume-from-checkpoint supplies them."
         )
 
-    workdir = raw_workdir.expanduser().resolve()
+    workdir = resolve_path(raw_workdir)
     workdir.mkdir(parents=True, exist_ok=True)
     output_json = (
-        args.output_json.expanduser().resolve()
+        resolve_path(args.output_json)
         if args.output_json
         else workdir / "opportunity-map.json"
     )
     checkpoint_json = (
-        args.checkpoint_json.expanduser().resolve()
+        resolve_path(args.checkpoint_json)
         if args.checkpoint_json
         else workdir / "checkpoint.json"
     )
@@ -381,23 +492,29 @@ def main(argv: Sequence[str] | None = None) -> int:
         raise SystemExit(str(exc)) from exc
 
     capture_manifest: CaptureManifest | None = None
+    manifest_path: Path | None = None
     if args.capture_status_json:
         try:
-            capture_manifest = load_capture_status(
-                args.capture_status_json.expanduser().resolve()
-            )
+            manifest_path = resolve_path(args.capture_status_json)
+            capture_manifest = load_capture_status(manifest_path)
         except (FileNotFoundError, json.JSONDecodeError, ValueError) as exc:
             raise SystemExit(f"Invalid capture status manifest: {exc}") from exc
 
-    ubersuggest_input = args.ubersuggest_input
-    answer_input = args.answer_input
-    if capture_manifest:
-        ubersuggest_entry = manifest_entry(capture_manifest, "ubersuggest")
-        answer_entry = manifest_entry(capture_manifest, "answer_the_public")
-        if ubersuggest_input is None and ubersuggest_entry.get("artifact"):
-            ubersuggest_input = Path(str(ubersuggest_entry["artifact"]))
-        if answer_input is None and answer_entry.get("artifact"):
-            answer_input = Path(str(answer_entry["artifact"]))
+    ubersuggest_input = resolve_path(args.ubersuggest_input) if args.ubersuggest_input else None
+    answer_input = resolve_path(args.answer_input) if args.answer_input else None
+    if capture_manifest and manifest_path is not None:
+        ubersuggest_entry = capture_manifest["ubersuggest"]
+        answer_entry = capture_manifest["answer_the_public"]
+        if ubersuggest_input is None:
+            ubersuggest_input = resolve_manifest_artifact(
+                ubersuggest_entry,
+                manifest_path=manifest_path,
+            )
+        if answer_input is None:
+            answer_input = resolve_manifest_artifact(
+                answer_entry,
+                manifest_path=manifest_path,
+            )
         if ubersuggest_status is None:
             ubersuggest_status = parse_source_status(
                 str(ubersuggest_entry.get("issue") or ubersuggest_entry.get("status") or "")
@@ -430,8 +547,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     ubersuggest_rows: list[JsonMap] = []
     answer_rows: list[JsonMap] = []
     source_statuses: dict[str, SourceState] = {
-        "ubersuggest": {"status": "pending", "issue": None},
-        "answer_the_public": {"status": "pending", "issue": None},
+        source: {"status": "pending", "issue": None} for source in KNOWN_SOURCES
     }
 
     for source_name, source_path, status_override in (
@@ -440,9 +556,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     ):
         rows_target = ubersuggest_rows if source_name == "ubersuggest" else answer_rows
         issue = None if status_override in {None, "ok"} else status_override
-        if source_path:
+        if source_path is not None:
             try:
-                artifact = load_artifact(source_path.expanduser().resolve())
+                artifact = load_artifact(source_path)
                 normalized_name = (
                     "answer-the-public" if source_name == "answer_the_public" else source_name
                 )
@@ -512,7 +628,93 @@ def main(argv: Sequence[str] | None = None) -> int:
         review_required=review_required,
         resumed_from=resumed_from,
     )
-    output_json.parent.mkdir(parents=True, exist_ok=True)
-    output_json.write_text(json.dumps(output, indent=2) + "\n", encoding="utf-8")
+    validated_output = validate_opportunity_map(
+        output,
+        valid_issues=VALID_ISSUES,
+        valid_statuses=OUTPUT_STATUSES,
+    )
+    write_json(output_json, validated_output)
     print(f"Opportunity map written to: {output_json}")
     return 0
+
+
+def run_command(args: argparse.Namespace) -> int:
+    """Execute a fresh run."""
+    return execute_pipeline(args)
+
+
+def resume_command(args: argparse.Namespace) -> int:
+    """Resume from a checkpoint."""
+    resumed_from = resolve_path(args.resume_from_checkpoint)
+    return execute_pipeline(args, resumed_from=resumed_from)
+
+
+def validate_command(args: argparse.Namespace) -> int:
+    """Validate a contract file on disk."""
+    path = resolve_path(args.path)
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+        if args.kind == "capture-status":
+            validate_capture_manifest(data, valid_statuses=VALID_SOURCE_STATUSES)
+        elif args.kind == "checkpoint":
+            validate_checkpoint_payload(data, valid_issues=VALID_ISSUES)
+        else:
+            validate_opportunity_map(
+                data,
+                valid_issues=VALID_ISSUES,
+                valid_statuses=OUTPUT_STATUSES,
+            )
+    except (FileNotFoundError, json.JSONDecodeError, ValueError) as exc:
+        raise SystemExit(f"Invalid {args.kind} contract: {exc}") from exc
+    print(f"{args.kind} contract is valid: {path}")
+    return 0
+
+
+def init_command(args: argparse.Namespace) -> int:
+    """Initialize a runnable workdir scaffold."""
+    workdir = resolve_path(args.workdir)
+    if workdir.exists() and any(workdir.iterdir()) and not args.force:
+        raise SystemExit(
+            "Workdir already exists and is not empty: "
+            f"{workdir}. Use --force to overwrite scaffold files."
+        )
+
+    workdir.mkdir(parents=True, exist_ok=True)
+    ubersuggest_path = workdir / "ubersuggest.json"
+    answer_path = workdir / "answer-the-public.csv"
+    capture_status_path = workdir / "capture-status.json"
+
+    ubersuggest_path.write_text(
+        json.dumps(INIT_UBERSUGGEST_SAMPLE, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    answer_path.write_text(INIT_ANSWER_SAMPLE, encoding="utf-8")
+    write_json(capture_status_path, INIT_CAPTURE_STATUS)
+
+    manifest = load_capture_status(capture_status_path)
+    resolve_manifest_artifact(manifest["ubersuggest"], manifest_path=capture_status_path)
+    resolve_manifest_artifact(manifest["answer_the_public"], manifest_path=capture_status_path)
+
+    print(f"Initialized workdir: {workdir}")
+    print(f"- capture status: {capture_status_path}")
+    print(f"- ubersuggest sample: {ubersuggest_path}")
+    print(f"- answer-the-public sample: {answer_path}")
+    return 0
+
+
+def main(argv: Sequence[str] | None = None) -> int:
+    """CLI entrypoint."""
+    parser = build_parser()
+    raw_argv = sys.argv[1:] if argv is None else list(argv)
+    normalized_argv = normalize_command_argv(raw_argv)
+    args = parser.parse_args(normalized_argv)
+
+    command_fn = getattr(args, "command_fn", None)
+    if command_fn is None:
+        parser.print_help()
+        return 0
+
+    try:
+        return command_fn(args)
+    except ValueError as exc:
+        raise SystemExit(str(exc)) from exc

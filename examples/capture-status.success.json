@@ -1,0 +1,10 @@
+{
+  "ubersuggest": {
+    "status": "ok",
+    "artifact": "examples/ubersuggest.sample.json"
+  },
+  "answer_the_public": {
+    "status": "ok",
+    "artifact": "examples/answer-the-public.sample.csv"
+  }
+}

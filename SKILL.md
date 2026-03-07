@@ -1,43 +1,29 @@
 ---
 name: SearchIntentAutomation
-description: Use when turning a niche, offer, product, or topic into a keyword map, audience question map, and an agent-executable workflow using Ubersuggest, AnswerThePublic, Playwright MCP browser capture, and Python orchestration. Also use when extracting repeatable market-research workflows from reels, demos, or creator tool stacks and rewriting them into non-interactive CLI-agent pipelines.
+description: Use when turning a niche, offer, product, or topic into a keyword map, audience question map, and an agent-executable workflow using Ubersuggest, AnswerThePublic, Playwright MCP browser capture, and Python orchestration.
 ---
-
-## Customization
-
-**Before executing, check for user customizations at:**
-`~/.claude/skills/PAI/USER/SKILLCUSTOMIZATIONS/SearchIntentAutomation/`
-
-If this directory exists, load and apply any `PREFERENCES.md`, configurations, or resources found there. These override default behavior. If the directory does not exist, proceed with skill defaults.
 
 # SearchIntentAutomation
 
-Turn a seed topic into an actionable research and automation workflow.
+This repo is the canonical public source for the Search Intent Automation skill.
 
-## Workflow Routing
+## Public package mode
 
-| Trigger | Workflow |
-|---------|----------|
-| Extract a reusable workflow from a reel or creator demo | `Workflows/ExtractFromSource.md` |
-| Build a keyword, question, and automation stack for a topic or offer | `Workflows/BuildOpportunityMap.md` |
-| Run the workflow end-to-end with CLI coding agents | `Workflows/RunWithCliAgents.md` |
+Install the package and run the CLI described in `README.md` and `docs/`.
 
-## Quick Reference
+## Skill mode
 
-- Step 1: Use `Ubersuggest` to map demand, keyword variants, SEO opportunities, and competitor gaps.
-- Step 2: Use `AnswerThePublic` to map real audience questions, comparisons, and prepositions around the same seed term.
-- Step 3: Use `Playwright MCP` to capture browser-only research data and a Python CLI pipeline to normalize, merge, and route outputs.
-- Step 3a: Hand off browser results with the capture manifest contract in `Tools/CaptureStatusContract.md`.
-- Step 4: Optional AI layer: generate content briefs or landing-page drafts from the validated keywords/questions.
-- If the pipeline gets stuck, stop and present a taxonomy-based checkpoint with:
-  - Recommended option 1
-  - Recommended option 2
-  - Custom user direction
+If your runtime loads local skill folders directly, use this file as the entrypoint and load:
 
-## Loaded Context
+- `Workflows/BuildOpportunityMap.md`
+- `Workflows/ExtractFromSource.md`
+- `Workflows/RunWithCliAgents.md`
+- `FailureTaxonomy.md`
+- `Tools/CaptureStatusContract.md`
 
-- Reel evidence and extraction trace: `ReelEvidence.md`
-- Core workflow details: `Workflows/BuildOpportunityMap.md`
-- Non-interactive agent execution: `Workflows/RunWithCliAgents.md`
-- Failure and checkpoint taxonomy: `FailureTaxonomy.md`
-- Playwright-to-Python handoff contract: `Tools/CaptureStatusContract.md`
+## Quick reference
+
+- Capture browser-only research data with Playwright MCP.
+- Hand off results through `capture-status.json`.
+- Run the installed CLI or `python Tools/OpportunityPipeline.py`.
+- If blocked, present `taxonomy`, `recommended option 1`, `recommended option 2`, and `custom direction`.

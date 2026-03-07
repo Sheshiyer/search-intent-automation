@@ -1,0 +1,10 @@
+{
+  "ubersuggest": {
+    "status": "rate-limited",
+    "artifact": null
+  },
+  "answer_the_public": {
+    "status": "ok",
+    "artifact": "examples/answer-the-public.sample.csv"
+  }
+}

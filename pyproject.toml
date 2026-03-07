@@ -1,0 +1,87 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "search-intent-automation"
+version = "0.1.0"
+description = "Deterministic search-intent automation with Playwright MCP capture and Python CLI orchestration"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "Apache-2.0" }
+authors = [
+  { name = "Shesh Narayan Iyer", email = "sheshnarayan.iyer@gmail.com" }
+]
+keywords = ["cli", "playwright", "seo", "search-intent", "automation"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Environment :: Console",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: Apache Software License",
+  "Operating System :: MacOS",
+  "Operating System :: POSIX :: Linux",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Internet :: WWW/HTTP",
+  "Topic :: Software Development :: Build Tools",
+  "Topic :: Utilities",
+]
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+  "build>=1.2.2",
+  "mypy>=1.15.0",
+  "pytest>=8.3.5",
+  "ruff>=0.11.0",
+  "twine>=6.1.0",
+]
+
+[project.scripts]
+search-intent-automation = "search_intent_automation.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/Sheshiyer/search-intent-automation"
+Documentation = "https://github.com/Sheshiyer/search-intent-automation#readme"
+Repository = "https://github.com/Sheshiyer/search-intent-automation"
+Issues = "https://github.com/Sheshiyer/search-intent-automation/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/search_intent_automation"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+  "/src",
+  "/tests",
+  "/docs",
+  "/examples",
+  "/Tools",
+  "/Workflows",
+  "/README.md",
+  "/LICENSE",
+  "/CHANGELOG.md",
+  "/CONTRIBUTING.md",
+  "/SECURITY.md",
+  "/CODE_OF_CONDUCT.md",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "UP", "B", "SIM"]
+
+[tool.mypy]
+python_version = "3.11"
+warn_unused_configs = true
+disallow_untyped_defs = true
+no_implicit_optional = true
+check_untyped_defs = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-q"

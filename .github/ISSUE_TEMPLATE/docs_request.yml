@@ -1,0 +1,32 @@
+name: Documentation request
+description: Report a docs gap, confusing page, or path mismatch
+labels:
+  - documentation
+body:
+  - type: dropdown
+    id: docs_area
+    attributes:
+      label: Docs area
+      options:
+        - README.md
+        - docs/installation.md
+        - docs/development.md
+        - docs/release.md
+        - docs/architecture.md
+        - docs/faq.md
+        - docs/skill-install.md
+        - SKILL.md
+        - Workflow docs
+    validations:
+      required: true
+  - type: textarea
+    id: issue
+    attributes:
+      label: What is unclear or incorrect?
+    validations:
+      required: true
+  - type: textarea
+    id: suggested_change
+    attributes:
+      label: Suggested improvement
+      description: Optional. Include the command, path, or section that should change.

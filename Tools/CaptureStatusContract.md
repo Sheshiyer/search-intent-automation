@@ -66,7 +66,17 @@ Use these exact source keys:
 Run:
 
 ```bash
-python3 ~/.claude/skills/SearchIntentAutomation/Tools/OpportunityPipeline.py \
+search-intent-automation \
+  --seed "SEED" \
+  --goal "GOAL" \
+  --workdir /path/to/run \
+  --capture-status-json /path/to/run/capture-status.json
+```
+
+Or use the repo-local compatibility script:
+
+```bash
+python3 Tools/OpportunityPipeline.py \
   --seed "SEED" \
   --goal "GOAL" \
   --workdir /path/to/run \
